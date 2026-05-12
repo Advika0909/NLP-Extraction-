@@ -1,6 +1,6 @@
 # Prescription NLP Extraction Pipeline
 
-A hybrid NLP pipeline for extracting structured prescription information from noisy raw prescription text.
+A custom NLP pipeline for extracting structured prescription information from noisy raw prescription text using spaCy-based Named Entity Recognition (NER) and rule-based normalization.
 
 ---
 
@@ -33,7 +33,7 @@ extract structured fields:
 .
 ├── prescription_raw_text_only.json
 ├── structured_output.json
-├── prescription_pipeline.py
+├── prescription_pipeline_ner.py
 ├── requirements.txt
 └── README.md
 ```
@@ -42,17 +42,15 @@ extract structured fields:
 
 # Approach
 
-This project uses a **Hybrid NLP + Rule-Based Pipeline**.
+This project uses a custom NLP pipeline combining:
 
-Instead of relying purely on regex or purely on LLMs, the system combines:
-
-- spaCy NLP tokenization
-- Regex-based medical entity extraction
+- spaCy Named Entity Recognition (NER)
+- Regex-based entity extraction
+- Token boundary alignment
 - Rule-based normalization
-- Token boundary detection
 - Postprocessing cleanup
 
-This improves robustness on noisy clinical prescription text.
+The system is designed to handle noisy and inconsistent prescription text commonly found in real-world clinical data.
 
 ---
 
@@ -66,32 +64,35 @@ This improves robustness on noisy clinical prescription text.
                                v
                     +----------------------+
                     | Text Preprocessing   |
-                    | Lowercasing/Cleanup  |
+                    | Cleanup & Normalize  |
                     +----------+-----------+
                                |
                                v
                     +----------------------+
-                    | spaCy Tokenization   |
+                    | Entity Detection     |
+                    | Regex + spaCy NER   |
                     +----------+-----------+
                                |
                                v
-         +---------------------------------------------+
-         | Hybrid Entity Extraction                    |
-         |---------------------------------------------|
-         | Regex: strength, dosage, duration           |
-         | Rules: form, frequency, notes, purpose      |
-         | NLP: medicine name boundary detection       |
-         +----------------+----------------------------+
-                          |
-                          v
-               +----------------------+
-               | Normalization Layer  |
-               +----------+-----------+
-                          |
-                          v
-               +----------------------+
-               | Structured JSON      |
-               +----------------------+
+                    +----------------------+
+                    | Custom NER Training  |
+                    +----------+-----------+
+                               |
+                               v
+                    +----------------------+
+                    | Entity Extraction    |
+                    +----------+-----------+
+                               |
+                               v
+                    +----------------------+
+                    | Postprocessing       |
+                    | Normalization        |
+                    +----------+-----------+
+                               |
+                               v
+                    +----------------------+
+                    | Structured JSON      |
+                    +----------------------+
 ```
 
 ---
@@ -99,8 +100,8 @@ This improves robustness on noisy clinical prescription text.
 # Features
 
 - Handles noisy prescription text
-- Supports medical abbreviations
-- Supports compact durations:
+- Supports shorthand medical notation
+- Handles compact durations:
   - x5d
   - 10d
   - 2w
@@ -109,15 +110,15 @@ This improves robustness on noisy clinical prescription text.
   - 2.5 mg
 - Extracts:
   - medicine name
-  - form
   - strength
   - dosage
   - frequency
   - duration
   - purpose
   - notes
-- Generalized token-based extraction
-- Hybrid NLP + regex architecture
+- Custom NER training pipeline
+- Token boundary alignment validation
+- Structured JSON output generation
 
 ---
 
@@ -164,7 +165,7 @@ python -m spacy download en_core_web_sm
 ## Run Pipeline
 
 ```bash
-python prescription_pipeline.py
+python prescription_pipeline_ner.py
 ```
 
 ---
@@ -203,39 +204,18 @@ python prescription_pipeline.py
 
 # Extraction Strategy
 
-The extraction pipeline uses a hybrid approach:
+The pipeline combines NLP and rule-based extraction methods.
 
 | Field | Method |
 |---|---|
-| medicine_name | NLP token boundary detection |
-| form | Dictionary + regex |
-| strength | Regex |
-| dosage | Regex |
-| frequency | Rule matching |
+| medicine_name | Custom spaCy NER |
+| form | Rule-based normalization |
+| strength | Regex extraction |
+| dosage | Regex extraction |
+| frequency | Regex + rules |
 | duration | Regex normalization |
 | purpose | Keyword extraction |
 | notes | Rule matching |
-
----
-
-# Evaluation
-
-The project includes heuristic extraction accuracy for:
-
-- Medicine extraction
-- Strength extraction
-- Frequency extraction
-- Duration extraction
-
-Example:
-
-```text
-Medicine Extraction Accuracy : 99.85%
-Strength Extraction Accuracy : 90.39%
-Frequency Extraction Accuracy: 74.65%
-Duration Extraction Accuracy : 74.32%
-Overall Heuristic Accuracy: 84.80%
-```
 
 ---
 
@@ -243,7 +223,7 @@ Overall Heuristic Accuracy: 84.80%
 
 Prescription text is highly inconsistent and noisy.
 
-Examples:
+Examples include:
 
 - x5d
 - 10d
@@ -251,25 +231,25 @@ Examples:
 - shorthand notation
 - OCR-style formatting
 - merged tokens
+- inconsistent spacing
 
-Pure regex approaches were insufficient.
-
-A hybrid NLP + rule-based system significantly improved robustness.
+To improve robustness, a custom NER pipeline was developed with preprocessing and normalization techniques.
 
 ---
 
 # Future Improvements
 
-- Train custom medical NER model
+- Fine-tune biomedical transformer models
 - Add OCR support
+- Add fuzzy medicine matching
 - Use biomedical ontologies
-- Add fuzzy drug matching
-- Add evaluation against annotated ground truth
+- Build annotated evaluation dataset
 - Deploy as FastAPI service
+- Improve contextual entity recognition
 
 ---
 
-# Example Results
+# Example Result
 
 ## Input
 
@@ -296,7 +276,6 @@ Tab Vitamin D3 1000 IU 1 tablet OD x 3 days after food
 
 # Requirements
 
-
 ```txt
 spacy
 pandas
@@ -320,14 +299,13 @@ prescription-nlp-pipeline/
 │
 ├── README.md
 ├── requirements.txt
-├── prescription_pipeline.py
+├── prescription_pipeline_ner.py
 ├── prescription_raw_text_only.json
 ├── structured_output.json
-
 ```
 
 ---
 
 # Author
 
-Advika Sawant
+**Advika Sawant**

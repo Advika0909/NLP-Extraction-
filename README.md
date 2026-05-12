@@ -136,7 +136,7 @@ This improves robustness on noisy clinical prescription text.
 ## Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/prescription-nlp-pipeline.git
+git clone https://github.com/Advika0909/prescription-nlp-pipeline.git
 
 cd prescription-nlp-pipeline
 ```

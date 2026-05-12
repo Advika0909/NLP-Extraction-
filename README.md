@@ -296,7 +296,6 @@ Tab Vitamin D3 1000 IU 1 tablet OD x 3 days after food
 
 # Requirements
 
-Create a `requirements.txt` file with:
 
 ```txt
 spacy
@@ -324,7 +323,7 @@ prescription-nlp-pipeline/
 ├── prescription_pipeline.py
 ├── prescription_raw_text_only.json
 ├── structured_output.json
-└── .gitignore
+
 ```
 
 ---
